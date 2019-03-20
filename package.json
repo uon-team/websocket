@@ -1,0 +1,32 @@
+{
+  "name": "websocket",
+  "version": "0.9.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+      "@uon/core": "^0.9.0",
+      "@uon/http": "^0.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^10.11.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uon-team/websocket.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Gabriel Roy",
+    "email": "gab@uon.io",
+    "url": "https://uon.io"
+  },
+  "keywords": [
+    "uon",
+    "router",
+    "typescript"
+  ]
+}
