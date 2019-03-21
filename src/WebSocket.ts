@@ -189,7 +189,7 @@ export class WebSocket extends WsContext {
         // create websocket
         let ws = new WebSocket();
 
-        // let WsContext be a friend
+        // consider WsContext to be a friend
         (ws as any).assignSocket(socket, context.head);
 
         return ws;

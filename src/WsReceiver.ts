@@ -39,12 +39,18 @@ export class WsReceiver extends Writable {
     private _state: ReceiverState = ReceiverState.ReadInfo;
 
 
-    constructor(private _binaryType: string,
+    constructor(private _binaryType: 'arraybuffer' | 'nodebuffer',
         private _maxPayload: number) {
         super();
     }
 
 
+    /**
+     * Writable implementation
+     * @param chunk 
+     * @param encoding 
+     * @param cb 
+     */
     _write(chunk: any, encoding: any, cb: Function) {
         if (this._opcode === 0x08) return cb();
 
@@ -59,7 +65,7 @@ export class WsReceiver extends Writable {
         let err;
         this._loop = true;
 
-        do {
+        while (this._loop) {
             switch (this._state) {
                 case ReceiverState.ReadInfo:
                     err = this.readInfo();
@@ -80,7 +86,7 @@ export class WsReceiver extends Writable {
                     this._loop = false;
                     return;
             }
-        } while (this._loop);
+        }
 
         cb(err);
 
@@ -103,7 +109,7 @@ export class WsReceiver extends Writable {
 
         const dst = Buffer.allocUnsafe(n);
 
-        do {
+        while (n > 0) {
 
             const buf = this._buffers[0];
 
@@ -120,7 +126,7 @@ export class WsReceiver extends Writable {
             }
 
             n -= buf.length;
-        } while (n > 0);
+        }
 
         return dst;
     }
@@ -140,10 +146,10 @@ export class WsReceiver extends Writable {
 
         const compressed = (buf[0] & 0x40) === 0x40;
 
-         if (compressed) {
-             this._loop = false;
-             return MakeError(RangeError, `Implementation doesn't yet support compression`, WsErrorCode.UnsupportedData);
-         }
+        if (compressed) {
+            this._loop = false;
+            return MakeError(RangeError, `Implementation doesn't yet support compression`, WsErrorCode.UnsupportedData);
+        }
 
         this._fin = (buf[0] & 0x80) === 0x80;
         this._opcode = buf[0] & 0x0f;
@@ -223,12 +229,8 @@ export class WsReceiver extends Writable {
             }
         }
 
-        if (this._masked) {
-            this._state = ReceiverState.ReadMask;
-        }
-        else {
-            this._state = ReceiverState.ReadData;
-        }
+        this._state = this._masked ? ReceiverState.ReadMask : ReceiverState.ReadData;
+
     }
 
 

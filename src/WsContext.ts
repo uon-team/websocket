@@ -167,25 +167,25 @@ export class WsContext extends EventSource {
      */
     protected assignSocket(socket: Socket, head: Buffer = EMPTY_BUFFER) {
 
-        let on_data = (chunk: any) => {
+        const on_data = (chunk: any) => {
             if (!this._receiver.write(chunk)) {
                 this._socket.pause();
             }
         }
 
-        let on_error = (err: Error) => {
+        const on_error = (err: Error) => {
             this._socket.removeListener('error', on_error);
             this._state = WsContextState.Closing;
             this._socket.destroy();
         };
 
-        let on_end = () => {
+        const on_end = () => {
             this._state = WsContextState.Closing;
             this._receiver.end();
             this._socket.end();
         }
 
-        let on_close = () => {
+        const on_close = () => {
 
             this._socket.removeListener('close', on_close);
             this._socket.removeListener('end', on_end);
@@ -201,12 +201,14 @@ export class WsContext extends EventSource {
 
         }
 
-        let receiver = this._receiver = new WsReceiver('nodebuffer', this._maxPayload);
+         // create receiver and attach listeners
+        const receiver = this._receiver = new WsReceiver('nodebuffer', this._maxPayload);
+
         receiver.on('conclude', (code, reason) => {
 
             this._socket.removeListener('data', on_data);
             this._socket.resume();
-            this.close();
+            this.close(code, reason);
 
         });
 
@@ -245,7 +247,8 @@ export class WsContext extends EventSource {
         socket.on('error', on_error);
         socket.on('data', on_data);
 
-        let sender = this._sender = new WsSender(socket);
+        // create sender
+        this._sender = new WsSender(socket);
 
         // maybe some initial data to push
         if (head.length > 0) {
